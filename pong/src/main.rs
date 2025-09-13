@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 
+
 #[derive(Component)]
 struct Player {
     side: Side,
@@ -44,10 +45,18 @@ fn print_player_properties(query: Query<&Player>) {
     }
 }
 
+pub struct PongPlugin;
+
+impl Plugin for PongPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_systems(Startup, setup);
+        app.add_systems(Update, (print_ball_properties, print_player_properties));
+    }
+}
+
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
-        .add_systems(Startup, setup)
-        .add_systems(Update, (print_ball_properties, print_player_properties))
+        .add_plugins(PongPlugin)
         .run();
 }
