@@ -31,24 +31,32 @@ fn setup(mut commands: Commands) {
     },));
 }
 
-fn print_ball_properties(query: Query<&Ball>) {
-    for ball in &query {
-        println!("Ball position: ({}, {})", ball.x, ball.y);
-        println!("Ball velocity: ({}, {})", ball.velocity.x, ball.velocity.y);
-        println!("Ball direction: ({}, {})", ball.direction.x, ball.direction.y);
+fn print_ball_properties(time: Res<Time>, mut timer: ResMut<PrintTimer>, query: Query<&Ball>) {
+    if timer.0.tick(time.delta()).just_finished() {
+        for ball in &query {
+            println!("Ball position: ({}, {})", ball.x, ball.y);
+            println!("Ball velocity: ({}, {})", ball.velocity.x, ball.velocity.y);
+            println!("Ball direction: ({}, {})", ball.direction.x, ball.direction.y);
+        }
     }
 }
 
-fn print_player_properties(query: Query<&Player>) {
-    for player in &query {
-        println!("Player side: {:?}", player.side);
+fn print_player_properties(time: Res<Time>, mut timer: ResMut<PrintTimer>,query: Query<&Player>) {
+    if timer.0.tick(time.delta()).just_finished() {
+        for player in &query {
+            println!("Player side: {:?}", player.side);
+        }
     }
 }
+
+#[derive(Resource)]
+struct PrintTimer(Timer);
 
 pub struct PongPlugin;
 
 impl Plugin for PongPlugin {
     fn build(&self, app: &mut App) {
+        app.insert_resource(PrintTimer(Timer::from_seconds(2.0, TimerMode::Repeating)));
         app.add_systems(Startup, setup);
         app.add_systems(Update, (print_ball_properties, print_player_properties));
     }
