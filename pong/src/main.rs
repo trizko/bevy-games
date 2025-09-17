@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy::sprite::{Wireframe2dConfig, Wireframe2dPlugin};
 
 
 #[derive(Component)]
@@ -20,9 +21,29 @@ struct Ball {
     y: f32,
 }
 
-fn setup(mut commands: Commands) {
+fn setup(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
+    windows: Query<&mut Window>,
+) {
+    commands.spawn(Camera2d);
+
     commands.spawn((Player { side: Side::Left },));
     commands.spawn((Player { side: Side::Right },));
+
+    commands.spawn((
+        Mesh2d(meshes.add(Rectangle::new(20.0, 100.0))),
+        MeshMaterial2d(materials.add(Color::WHITE)),
+        Transform::from_xyz(windows.single().unwrap().width()/2.0 - 10., 0.0, 0.0)
+    ));
+    commands.spawn((
+        Mesh2d(meshes.add(Rectangle::new(20.0, 100.0))),
+        MeshMaterial2d(materials.add(Color::WHITE)),
+        Transform::from_xyz(-windows.single().unwrap().width()/2.0 + 10., 0.0, 0.0)
+    ));
+
+
     commands.spawn((Ball {
         velocity: Vec2::new(100.0, 100.0),
         direction: Vec2::new(1.0, 1.0),
@@ -64,7 +85,10 @@ impl Plugin for PongPlugin {
 
 fn main() {
     App::new()
-        .add_plugins(DefaultPlugins)
+        .add_plugins((
+            DefaultPlugins, 
+            Wireframe2dPlugin::default()
+        ))
         .add_plugins(PongPlugin)
         .run();
 }
