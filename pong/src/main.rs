@@ -1,7 +1,6 @@
 use bevy::prelude::*;
 use bevy::sprite::{Wireframe2dConfig, Wireframe2dPlugin};
 
-
 #[derive(Component)]
 struct Player {
     side: Side,
@@ -35,14 +34,13 @@ fn setup(
     commands.spawn((
         Mesh2d(meshes.add(Rectangle::new(20.0, 100.0))),
         MeshMaterial2d(materials.add(Color::WHITE)),
-        Transform::from_xyz(windows.single().unwrap().width()/2.0 - 10., 0.0, 0.0)
+        Transform::from_xyz(windows.single().unwrap().width() / 2.0 - 10., 0.0, 0.0),
     ));
     commands.spawn((
         Mesh2d(meshes.add(Rectangle::new(20.0, 100.0))),
         MeshMaterial2d(materials.add(Color::WHITE)),
-        Transform::from_xyz(-windows.single().unwrap().width()/2.0 + 10., 0.0, 0.0)
+        Transform::from_xyz(-windows.single().unwrap().width() / 2.0 + 10., 0.0, 0.0),
     ));
-
 
     commands.spawn((Ball {
         velocity: Vec2::new(100.0, 100.0),
@@ -57,12 +55,15 @@ fn print_ball_properties(time: Res<Time>, mut timer: ResMut<PrintTimer>, query: 
         for ball in &query {
             println!("Ball position: ({}, {})", ball.x, ball.y);
             println!("Ball velocity: ({}, {})", ball.velocity.x, ball.velocity.y);
-            println!("Ball direction: ({}, {})", ball.direction.x, ball.direction.y);
+            println!(
+                "Ball direction: ({}, {})",
+                ball.direction.x, ball.direction.y
+            );
         }
     }
 }
 
-fn print_player_properties(time: Res<Time>, mut timer: ResMut<PrintTimer>,query: Query<&Player>) {
+fn print_player_properties(time: Res<Time>, mut timer: ResMut<PrintTimer>, query: Query<&Player>) {
     if timer.0.tick(time.delta()).just_finished() {
         for player in &query {
             println!("Player side: {:?}", player.side);
@@ -85,10 +86,7 @@ impl Plugin for PongPlugin {
 
 fn main() {
     App::new()
-        .add_plugins((
-            DefaultPlugins, 
-            Wireframe2dPlugin::default()
-        ))
+        .add_plugins((DefaultPlugins, Wireframe2dPlugin::default()))
         .add_plugins(PongPlugin)
         .run();
 }
