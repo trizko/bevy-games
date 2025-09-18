@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use bevy::sprite::{Wireframe2dConfig, Wireframe2dPlugin};
+use bevy::sprite::Wireframe2dPlugin;
 
 #[derive(Component)]
 struct Player {
@@ -86,7 +86,10 @@ impl Plugin for PongPlugin {
 
 fn main() {
     App::new()
-        .add_plugins((DefaultPlugins, Wireframe2dPlugin::default()))
+        .add_plugins((DefaultPlugins.set(AssetPlugin {
+                watch_for_changes_override: Some(true),
+                ..Default::default()
+        }), Wireframe2dPlugin::default()))
         .add_plugins(PongPlugin)
         .run();
 }
