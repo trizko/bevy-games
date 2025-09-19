@@ -1,6 +1,6 @@
-use bevy::prelude::*;
-use crate::systems::*;
 use crate::resources::*;
+use crate::systems::*;
+use bevy::prelude::*;
 
 pub struct PongPlugin;
 
@@ -10,13 +10,16 @@ impl Plugin for PongPlugin {
             .insert_resource(GameConfig::default())
             .insert_resource(GameState::default())
             .add_systems(Startup, setup)
-            .add_systems(Update, (
-                handle_paddle_input,
-                move_ball,
-                handle_ball_paddle_collision,
-                handle_ball_wall_collision,
-                print_ball_properties, 
-                print_player_properties
-            ));
+            .add_systems(
+                Update,
+                (
+                    handle_paddle_input,
+                    move_ball,
+                    handle_ball_paddle_collision,
+                    handle_ball_wall_collision,
+                    print_ball_properties,
+                    print_player_properties,
+                ),
+            );
     }
 }

@@ -1,6 +1,6 @@
-use bevy::prelude::*;
 use crate::components::*;
 use crate::resources::*;
+use bevy::prelude::*;
 
 pub fn setup(
     mut commands: Commands,
@@ -12,32 +12,36 @@ pub fn setup(
     commands.spawn(Camera2d);
 
     // Spawn left player with their paddle
-    let _left_player = commands.spawn((
-        Player {
-            side: Side::Left,
-            score: 0,
-        },
-        Paddle {
-            speed: config.paddle_speed,
-        },
-        Mesh2d(meshes.add(Rectangle::new(config.paddle_width, config.paddle_height))),
-        MeshMaterial2d(materials.add(Color::WHITE)),
-        Transform::from_xyz(-windows.single().unwrap().width() / 2.0 + 10., 0.0, 0.0),
-    )).id();
+    let _left_player = commands
+        .spawn((
+            Player {
+                side: Side::Left,
+                score: 0,
+            },
+            Paddle {
+                speed: config.paddle_speed,
+            },
+            Mesh2d(meshes.add(Rectangle::new(config.paddle_width, config.paddle_height))),
+            MeshMaterial2d(materials.add(Color::WHITE)),
+            Transform::from_xyz(-windows.single().unwrap().width() / 2.0 + 10., 0.0, 0.0),
+        ))
+        .id();
 
     // Spawn right player with their paddle
-    let _right_player = commands.spawn((
-        Player {
-            side: Side::Right,
-            score: 0,
-        },
-        Paddle {
-            speed: config.paddle_speed,
-        },
-        Mesh2d(meshes.add(Rectangle::new(config.paddle_width, config.paddle_height))),
-        MeshMaterial2d(materials.add(Color::WHITE)),
-        Transform::from_xyz(windows.single().unwrap().width() / 2.0 - 10., 0.0, 0.0),
-    )).id();
+    let _right_player = commands
+        .spawn((
+            Player {
+                side: Side::Right,
+                score: 0,
+            },
+            Paddle {
+                speed: config.paddle_speed,
+            },
+            Mesh2d(meshes.add(Rectangle::new(config.paddle_width, config.paddle_height))),
+            MeshMaterial2d(materials.add(Color::WHITE)),
+            Transform::from_xyz(windows.single().unwrap().width() / 2.0 - 10., 0.0, 0.0),
+        ))
+        .id();
 
     // Spawn ball
     commands.spawn((
@@ -50,10 +54,7 @@ pub fn setup(
     ));
 }
 
-pub fn move_ball(
-    time: Res<Time>,
-    mut ball_query: Query<(&Ball, &mut Transform)>,
-) {
+pub fn move_ball(time: Res<Time>, mut ball_query: Query<(&Ball, &mut Transform)>) {
     for (ball, mut transform) in &mut ball_query {
         // Move ball based on velocity and time
         let movement = ball.velocity * time.delta_secs();
@@ -92,22 +93,24 @@ pub fn handle_ball_paddle_collision(
             let paddle_bottom = paddle_pos.y - paddle_half_height;
 
             // AABB collision detection
-            if ball_right >= paddle_left && ball_left <= paddle_right &&
-               ball_top >= paddle_bottom && ball_bottom <= paddle_top {
-                
+            if ball_right >= paddle_left
+                && ball_left <= paddle_right
+                && ball_top >= paddle_bottom
+                && ball_bottom <= paddle_top
+            {
                 // Ball hit the paddle - reverse X direction
                 ball.velocity.x = -ball.velocity.x;
-                
+
                 // Add some Y velocity based on where the ball hit the paddle
                 let hit_point = (ball_pos.y - paddle_pos.y) / paddle_half_height;
                 ball.velocity.y += hit_point * 100.0; // Add some spin
-                
+
                 // Ensure minimum speed
                 let speed = ball.velocity.length();
                 if speed < 200.0 {
                     ball.velocity = ball.velocity.normalize() * 200.0;
                 }
-                
+
                 println!("Ball hit {:?} paddle!", player.side);
                 break; // Only handle one collision per frame
             }
@@ -152,11 +155,17 @@ pub fn handle_ball_wall_collision(
     }
 }
 
-
-pub fn print_ball_properties(time: Res<Time>, mut timer: ResMut<PrintTimer>, query: Query<(&Ball, &Transform)>) {
+pub fn print_ball_properties(
+    time: Res<Time>,
+    mut timer: ResMut<PrintTimer>,
+    query: Query<(&Ball, &Transform)>,
+) {
     if timer.0.tick(time.delta()).just_finished() {
         for (ball, transform) in &query {
-            println!("Ball position: ({}, {})", transform.translation.x, transform.translation.y);
+            println!(
+                "Ball position: ({}, {})",
+                transform.translation.x, transform.translation.y
+            );
             println!("Ball velocity: ({}, {})", ball.velocity.x, ball.velocity.y);
         }
     }
@@ -204,16 +213,23 @@ pub fn handle_paddle_input(
             // Keep paddle within screen bounds
             let max_y = half_height - paddle_half_height;
             let min_y = -half_height + paddle_half_height;
-            
+
             transform.translation.y = transform.translation.y.clamp(min_y, max_y);
         }
     }
 }
 
-pub fn print_player_properties(time: Res<Time>, mut timer: ResMut<PrintTimer>, query: Query<(&Player, &Paddle)>) {
+pub fn print_player_properties(
+    time: Res<Time>,
+    mut timer: ResMut<PrintTimer>,
+    query: Query<(&Player, &Paddle)>,
+) {
     if timer.0.tick(time.delta()).just_finished() {
         for (player, paddle) in &query {
-            println!("Player {:?}: score={}, paddle_speed={}", player.side, player.score, paddle.speed);
+            println!(
+                "Player {:?}: score={}, paddle_speed={}",
+                player.side, player.score, paddle.speed
+            );
         }
     }
 }
