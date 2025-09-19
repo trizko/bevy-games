@@ -64,6 +64,57 @@ pub fn move_ball(
     }
 }
 
+pub fn handle_ball_paddle_collision(
+    mut ball_query: Query<(&mut Ball, &Transform), Without<Paddle>>,
+    paddle_query: Query<(&Player, &Transform), With<Paddle>>,
+    config: Res<GameConfig>,
+) {
+    for (mut ball, ball_transform) in &mut ball_query {
+        let ball_pos = ball_transform.translation;
+        let ball_radius = config.ball_size / 2.0;
+        let paddle_width = config.paddle_width;
+        let paddle_height = config.paddle_height;
+
+        for (player, paddle_transform) in &paddle_query {
+            let paddle_pos = paddle_transform.translation;
+            let paddle_half_width = paddle_width / 2.0;
+            let paddle_half_height = paddle_height / 2.0;
+
+            // Check if ball is colliding with paddle
+            let ball_left = ball_pos.x - ball_radius;
+            let ball_right = ball_pos.x + ball_radius;
+            let ball_top = ball_pos.y + ball_radius;
+            let ball_bottom = ball_pos.y - ball_radius;
+
+            let paddle_left = paddle_pos.x - paddle_half_width;
+            let paddle_right = paddle_pos.x + paddle_half_width;
+            let paddle_top = paddle_pos.y + paddle_half_height;
+            let paddle_bottom = paddle_pos.y - paddle_half_height;
+
+            // AABB collision detection
+            if ball_right >= paddle_left && ball_left <= paddle_right &&
+               ball_top >= paddle_bottom && ball_bottom <= paddle_top {
+                
+                // Ball hit the paddle - reverse X direction
+                ball.velocity.x = -ball.velocity.x;
+                
+                // Add some Y velocity based on where the ball hit the paddle
+                let hit_point = (ball_pos.y - paddle_pos.y) / paddle_half_height;
+                ball.velocity.y += hit_point * 100.0; // Add some spin
+                
+                // Ensure minimum speed
+                let speed = ball.velocity.length();
+                if speed < 200.0 {
+                    ball.velocity = ball.velocity.normalize() * 200.0;
+                }
+                
+                println!("Ball hit {:?} paddle!", player.side);
+                break; // Only handle one collision per frame
+            }
+        }
+    }
+}
+
 pub fn handle_ball_wall_collision(
     mut ball_query: Query<(&mut Ball, &mut Transform)>,
     windows: Query<&Window>,
@@ -107,6 +158,54 @@ pub fn print_ball_properties(time: Res<Time>, mut timer: ResMut<PrintTimer>, que
         for (ball, transform) in &query {
             println!("Ball position: ({}, {})", transform.translation.x, transform.translation.y);
             println!("Ball velocity: ({}, {})", ball.velocity.x, ball.velocity.y);
+        }
+    }
+}
+
+pub fn handle_paddle_input(
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+    time: Res<Time>,
+    mut paddle_query: Query<(&Player, &Paddle, &mut Transform)>,
+    windows: Query<&Window>,
+) {
+    let window = windows.single().unwrap();
+    let half_height = window.height() / 2.0;
+    let paddle_half_height = 50.0; // Half of paddle height (100.0 / 2)
+
+    for (player, paddle, mut transform) in &mut paddle_query {
+        let mut direction = 0.0;
+
+        match player.side {
+            Side::Left => {
+                // Left player uses W and S keys
+                if keyboard_input.pressed(KeyCode::KeyW) {
+                    direction += 1.0;
+                }
+                if keyboard_input.pressed(KeyCode::KeyS) {
+                    direction -= 1.0;
+                }
+            }
+            Side::Right => {
+                // Right player uses Up and Down arrow keys
+                if keyboard_input.pressed(KeyCode::ArrowUp) {
+                    direction += 1.0;
+                }
+                if keyboard_input.pressed(KeyCode::ArrowDown) {
+                    direction -= 1.0;
+                }
+            }
+        }
+
+        // Move paddle
+        if direction != 0.0 {
+            let movement = direction * paddle.speed * time.delta_secs();
+            transform.translation.y += movement;
+
+            // Keep paddle within screen bounds
+            let max_y = half_height - paddle_half_height;
+            let min_y = -half_height + paddle_half_height;
+            
+            transform.translation.y = transform.translation.y.clamp(min_y, max_y);
         }
     }
 }
