@@ -15,9 +15,6 @@ pub enum Side {
 #[derive(Component)]
 pub struct Ball {
     pub velocity: Vec2,
-    pub direction: Vec2,
-    pub x: f32,
-    pub y: f32,
 }
 
 #[derive(Component)]

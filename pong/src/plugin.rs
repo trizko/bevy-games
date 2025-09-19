@@ -10,6 +10,11 @@ impl Plugin for PongPlugin {
             .insert_resource(GameConfig::default())
             .insert_resource(GameState::default())
             .add_systems(Startup, setup)
-            .add_systems(Update, (print_ball_properties, print_player_properties));
+            .add_systems(Update, (
+                move_ball,
+                handle_ball_wall_collision,
+                print_ball_properties, 
+                print_player_properties
+            ));
     }
 }

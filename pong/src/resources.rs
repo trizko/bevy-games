@@ -16,10 +16,10 @@ impl Default for GameConfig {
     fn default() -> Self {
         Self {
             paddle_speed: 300.0,
-            ball_speed: 200.0,
+            ball_speed: 400.0,
             paddle_height: 100.0,
             paddle_width: 20.0,
-            ball_size: 10.0,
+            ball_size: 20.0,
         }
     }
 }
